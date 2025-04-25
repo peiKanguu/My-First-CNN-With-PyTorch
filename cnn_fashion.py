@@ -80,11 +80,15 @@ class CNN(nn.Module):
 # === 单张预测函数 ===
 def predict(data, model, label_map, device, idx=0):
     images, labels = data
-    img = images[idx]
+
+    img = images[idx].unsqueeze(0).float() / 255.0  # ✅ 保持张量格式 + 转为 float + 归一化
     label = labels[idx]
 
+    # 显示图像
     plt.imshow(img.squeeze(), cmap="gray")
-    logit = model(img.unsqueeze(0).to(device))
+
+    # 模型预测
+    logit = model(img.unsqueeze(0).to(device))  # 再次添加 batch 维度，变为 [1, 1, 28, 28]
     pred_prob = F.softmax(logit, dim=1)
     argmax = torch.argmax(pred_prob).item()
 
@@ -158,7 +162,7 @@ def main():
     print("📊 Confusion Matrix:\n", cm)
 
     # 单图预测
-    predict((test_data.data, test_data.targets), loaded_model, label_map, config.DEVICE, idx=2)
+    predict((test_data.data, test_data.targets), loaded_model, label_map, config.DEVICE, idx=3)
 
 if __name__ == "__main__":
     main()
